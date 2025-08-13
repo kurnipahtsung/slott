@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chance Roller</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #90ee90;
+    }
+
+    .container {
+      text-align: center;
+      font-size: 52px;
+      font-family: Arial, sans-serif;
+      max-width: 2000px;
+    }
+
+    .header {
+      font-size: 36px;
+      font-weight: bold;
+      animation: flicker 1s infinite;
+      margin-bottom: 50px;
+    }
+
+    @keyframes flicker {
+      0%, 100% {
+        color: red;
+      }
+      25% {
+        color: blue;
+      }
+      50% {
+        color: green;
+      }
+      75% {
+        color: yellow;
+      }
+    }
+
+    .name-picker {
+      display: inline-block;
+      margin: 20px;
+      width: 300px;
+    }
+
+    .name-display {
+      padding: 30px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      margin-top: 10px;
+      background-color: #f0f0f0;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 40px;
+    }
+
+    .buttons button,
+    .buttons a {
+      margin: 40px 10px;
+      padding: 20px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">GET YOUR GAME BY MATCHING THREE PICTURES</div>
+
+    <!-- Name Roller -->
+    <div class="name-picker">
+      <div class="name-display" id="nameDisplay4">NAME</div>
+      <button onclick="startRandomName(4, ['NAME'])">Start Picker</button>
+      <button onclick="stopRandomName(4)">Stop Picker</button>
+    </div>
+    <br>
+
+    <!-- Roller 1 -->
+    <div class="name-picker">
+      <div class="name-display" id="nameDisplay1">🍇</div>
+      <button onclick="startRandomName(1)">Start Picker</button>
+      <button onclick="stopRandomName(1)">Stop Picker</button>
+    </div>
+
+    <!-- Roller 2 -->
+    <div class="name-picker">
+      <div class="name-display" id="nameDisplay2">🍇</div>
+      <button onclick="startRandomName(2)">Start Picker</button>
+      <button onclick="stopRandomName(2)">Stop Picker</button>
+    </div>
+
+    <!-- Roller 3 -->
+    <div class="name-picker">
+      <div class="name-display" id="nameDisplay3">🍇</div>
+      <button onclick="startRandomName(3)">Start Picker</button>
+      <button onclick="stopRandomName(3)">Stop Picker</button>
+    </div>
+  </div>
+
+  <script>
+    const symbols = ["🍊", "🍉", "🍍"];
+
+    const noMatchLinks = [
+      "https://wayground.com/join?gc=37642364",
+	  "https://wayground.com/join?gc=67068028",
+	  "https://www.youtube.com/shorts/41iWg91yFv0",
+	  "https://wayground.com/join?gc=14016636"
+    ];
+
+    const twoMatchLinks = [
+      "https://wayground.com/join?gc=32399484",
+      "https://wayground.com/join?gc=37707900",
+      "https://www.youtube.com/shorts/41iWg91yFv0",
+	  "https://www.youtube.com/shorts/41iWg91yFv0"
+    ];
+
+    const threeMatchLinks = [
+      "https://wayground.com/join?gc=28729468",
+      "https://wayground.com/join?gc=39805052",
+      "https://www.youtube.com/shorts/41iWg91yFv0",
+	  'https://www.youtube.com/shorts/41iWg91yFv0"
+    ];
+
+    let intervalIds = {};
+    let selectedCharacters = {};
+    let stoppedCount = 0;
+
+    function startRandomName(pickerNum, customList = symbols) {
+      const nameDisplay = document.getElementById(`nameDisplay${pickerNum}`);
+      let currentIndex = Math.floor(Math.random() * customList.length);
+
+      intervalIds[pickerNum] = setInterval(() => {
+        currentIndex = (currentIndex + 1) % customList.length;
+        nameDisplay.innerText = customList[currentIndex];
+      }, 20);
+
+      selectedCharacters[pickerNum] = null;
+    }
+
+    function stopRandomName(pickerNum) {
+      clearInterval(intervalIds[pickerNum]);
+      const nameDisplay = document.getElementById(`nameDisplay${pickerNum}`);
+      const selected = nameDisplay.innerText;
+
+      selectedCharacters[pickerNum] = selected;
+
+      // Roller 4 is just a name picker; skip logic
+      if (pickerNum === 4) {
+        return;
+      }
+
+      stoppedCount++;
+
+      if (stoppedCount === 3) {
+        setTimeout(() => {
+          if (checkForWin()) {
+            openRandomLink(threeMatchLinks);
+          } else if (checkForTwoIdentical()) {
+            openRandomLink(twoMatchLinks);
+          } else {
+            openRandomLink(noMatchLinks);
+          }
+
+          selectedCharacters = {};
+          stoppedCount = 0;
+        }, 2000);
+      }
+    }
+
+    function checkForWin() {
+      return (
+        selectedCharacters[1] === selectedCharacters[2] &&
+        selectedCharacters[2] === selectedCharacters[3]
+      );
+    }
+
+    function checkForTwoIdentical() {
+      const values = [
+        selectedCharacters[1],
+        selectedCharacters[2],
+        selectedCharacters[3]
+      ];
+      const counts = {};
+      values.forEach(val => {
+        counts[val] = (counts[val] || 0) + 1;
+      });
+      return Object.values(counts).some(count => count === 2);
+    }
+
+    function openRandomLink(linkArray) {
+      const randomLink = linkArray[Math.floor(Math.random() * linkArray.length)];
+      window.open(randomLink, "_blank");
+    }
+  </script>
+</body>
+</html>
